@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<!--
+ * @author      Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Infrangible_CatalogProductCustomerPrice::infrangible_catalogproductcustomerprice" title="Customer Price" module="Infrangible_CatalogProductCustomerPrice" sortOrder="1060" resource="Infrangible_CatalogProductCustomerPrice::infrangible_catalogproductcustomerprice" parent="Infrangible_Foundation::menu"/>
+        <add id="Infrangible_CatalogProductCustomerPrice::infrangible_catalogproductcustomerprice_manage" title="Manage" module="Infrangible_CatalogProductCustomerPrice" sortOrder="10" resource="Infrangible_CatalogProductCustomerPrice::infrangible_catalogproductcustomerprice" parent="Infrangible_CatalogProductCustomerPrice::infrangible_catalogproductcustomerprice" action="product_customer_price"/>
+    </menu>
+</config>
