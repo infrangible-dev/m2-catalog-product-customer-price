@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Infrangible\CatalogProductCustomerPrice\Block\Adminhtml\ProductCustomerPrice;
 
 use Magento\Framework\Data\Collection\AbstractDb;
-use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 
 /**
  * @author      Andreas Knollmann
@@ -16,9 +15,6 @@ class Grid extends \Infrangible\BackendWidget\Block\Grid
 {
     protected function prepareCollection(AbstractDb $collection): void
     {
-        if ($collection instanceof AbstractCollection) {
-            $collection->getSelect()->where('name_attribute.attribute_code = "name"');
-        }
     }
 
     /**
