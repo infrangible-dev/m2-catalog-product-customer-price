@@ -69,10 +69,9 @@ class ProductCustomerPrice extends Base
                 md5(
                     $this->json->encode(
                         [
-                            'customer_id' => $this->getCustomerId(),
-                            'product_id'  => $this->getProductId(),
-                            'price'       => $this->getPrice(),
-                            'discount'    => $this->getDiscount()
+                            'product_id' => $this->getProductId(),
+                            'price'      => $this->getPrice(),
+                            'discount'   => $this->getDiscount()
                         ]
                     )
                 )
