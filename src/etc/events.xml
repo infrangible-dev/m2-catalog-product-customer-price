@@ -9,4 +9,7 @@
     <event name="sales_order_place_after">
         <observer name="infrangible_catalogproductcustomerprice" instance="Infrangible\CatalogProductCustomerPrice\Observer\SalesOrderPlaceAfter"/>
     </event>
+    <event name="product_customer_price_save_commit_after">
+        <observer name="infrangible_catalogproductcustomerprice" instance="Infrangible\CatalogProductCustomerPrice\Observer\ProductCustomerPriceSaveCommitAfter"/>
+    </event>
 </config>

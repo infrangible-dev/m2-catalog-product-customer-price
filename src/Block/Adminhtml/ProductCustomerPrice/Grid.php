@@ -48,8 +48,18 @@ class Grid extends \Infrangible\BackendWidget\Block\Grid
         );
 
         $this->addNumberColumn(
+            'priority',
+            __('Priority')->render()
+        );
+
+        $this->addNumberColumn(
             'used',
             __('Used')->render()
+        );
+
+        $this->addYesNoColumn(
+            'active',
+            __('Active')->render()
         );
     }
 

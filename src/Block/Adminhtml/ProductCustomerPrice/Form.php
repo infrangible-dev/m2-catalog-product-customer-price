@@ -27,26 +27,42 @@ class Form extends \Infrangible\BackendWidget\Block\Form
             __('Customer')->render(),
             true
         );
+
         $this->addProductNameField(
             $fieldSet,
             'product_id',
             __('Product')->render(),
             true
         );
+
         $this->addPriceField(
             $fieldSet,
             'price',
             __('Price')->render()
         );
+
         $this->addDiscountField(
             $fieldSet,
             'discount',
             __('Discount')->render()
         );
+
         $this->addIntegerField(
             $fieldSet,
             'limit',
             __('Limit')->render()
+        );
+
+        $this->addIntegerField(
+            $fieldSet,
+            'priority',
+            __('Priority')->render()
+        );
+
+        $this->addYesNoField(
+            $fieldSet,
+            'active',
+            __('Active')->render()
         );
     }
 }

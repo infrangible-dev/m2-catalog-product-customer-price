@@ -26,4 +26,17 @@ class Collection extends AbstractCollection
     {
         $this->getSelect()->where('main_table.used < main_table.`limit` OR main_table.`limit` IS NULL');
     }
+
+    public function addActiveFilter()
+    {
+        $this->getSelect()->where(
+            'main_table.active = ?',
+            1
+        );
+    }
+
+    public function addPriorityOrder()
+    {
+        $this->getSelect()->order('main_table.priority DESC');
+    }
 }

@@ -48,6 +48,8 @@ class CatalogProductPriceCalculation implements ObserverInterface
 
         $productCustomerPriceCollection = $this->productCustomerPriceCollectionFactory->create();
         $productCustomerPriceCollection->addUsableFilter();
+        $productCustomerPriceCollection->addActiveFilter();
+        $productCustomerPriceCollection->addPriorityOrder();
 
         /** @var ProductCustomerPrice $productCustomerPrice */
         foreach ($productCustomerPriceCollection as $productCustomerPrice) {
@@ -67,6 +69,9 @@ class CatalogProductPriceCalculation implements ObserverInterface
                     $this->variables->intValue($productCustomerPrice->getDiscount())
                 );
             }
+            $productCustomerPriceCalculation->setPriority(
+                $this->variables->intValue($productCustomerPrice->getPriority())
+            );
             $productCustomerPriceCalculation->setQuoteItemOptionCode($productCustomerPrice->getId());
 
             $calculations->addCalculation($productCustomerPriceCalculation);

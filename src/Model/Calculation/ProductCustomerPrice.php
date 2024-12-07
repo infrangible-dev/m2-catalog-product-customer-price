@@ -57,8 +57,6 @@ class ProductCustomerPrice extends Base
 
         $this->customerSession = $customerSession;
         $this->json = $json;
-
-        $this->setPriority(100);
     }
 
     public function getCode(): string
@@ -71,7 +69,8 @@ class ProductCustomerPrice extends Base
                         [
                             'product_id' => $this->getProductId(),
                             'price'      => $this->getPrice(),
-                            'discount'   => $this->getDiscount()
+                            'discount'   => $this->getDiscount(),
+                            'priority'   => $this->getPriority()
                         ]
                     )
                 )

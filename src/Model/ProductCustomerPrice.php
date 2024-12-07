@@ -21,11 +21,15 @@ use Magento\Framework\Model\AbstractModel;
  * @method setDiscount(int $discount)
  * @method int getLimit()
  * @method void setLimit(int $limit)
+ * @method int getPriority()
+ * @method void setPriority(int $priority)
  * @method int getUsed()
  * @method setUsed(int $used)
  */
 class ProductCustomerPrice extends AbstractModel
 {
+    protected $_eventPrefix = 'product_customer_price';
+
     protected function _construct(): void
     {
         $this->_init(ResourceModel\ProductCustomerPrice::class);

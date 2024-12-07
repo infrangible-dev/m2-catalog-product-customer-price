@@ -16,7 +16,10 @@ class ProductCustomerPrice extends AbstractDb
 {
     protected function _construct(): void
     {
-        $this->_init('catalog_product_customer_price', 'id');
+        $this->_init(
+            'catalog_product_customer_price',
+            'id'
+        );
     }
 
     /**
