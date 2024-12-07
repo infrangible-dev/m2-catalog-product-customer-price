@@ -29,7 +29,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
         )) {
             $connection = $setup->getConnection();
 
-            if (! $connection->tableColumnExists($customerPricesTableName, 'price')) {
+            if (! $connection->tableColumnExists($customerPricesTableName, 'priority')) {
                 $connection->addColumn(
                     $customerPricesTableName,
                     'priority',
@@ -42,15 +42,15 @@ class UpgradeSchema implements UpgradeSchemaInterface
                         'after'    => 'limit'
                     ]
                 );
+            }
 
-                $limitUsedIndexName = $setup->getIdxName(
-                    $customerPricesTableName,
-                    ['limit', 'used']
-                );
+            $limitUsedIndexName = $setup->getIdxName(
+                $customerPricesTableName,
+                ['limit', 'used']
+            );
 
-                if (in_array($limitUsedIndexName, $connection->getIndexList($customerPricesTableName))) {
-                    $connection->dropIndex($customerPricesTableName, $limitUsedIndexName);
-                }
+            if (in_array($limitUsedIndexName, $connection->getIndexList($customerPricesTableName))) {
+                $connection->dropIndex($customerPricesTableName, $limitUsedIndexName);
             }
         }
 
