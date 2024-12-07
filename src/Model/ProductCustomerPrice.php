@@ -12,19 +12,21 @@ use Magento\Framework\Model\AbstractModel;
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  *
  * @method string getCustomerId()
- * @method setCustomerId(string $customerId)
+ * @method void setCustomerId(string $customerId)
  * @method string getProductId()
- * @method setProductId(string $productId)
+ * @method void setProductId(string $productId)
  * @method float getPrice()
- * @method setPrice(float $price)
+ * @method void setPrice(float $price)
  * @method int getDiscount()
- * @method setDiscount(int $discount)
+ * @method void setDiscount(int $discount)
  * @method int getLimit()
  * @method void setLimit(int $limit)
  * @method int getPriority()
  * @method void setPriority(int $priority)
  * @method int getUsed()
- * @method setUsed(int $used)
+ * @method void setUsed(int $used)
+ * @method int getActive()
+ * @method void setActive(int $active)
  */
 class ProductCustomerPrice extends AbstractModel
 {

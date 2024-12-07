@@ -59,10 +59,11 @@ class Form extends \Infrangible\BackendWidget\Block\Form
             __('Priority')->render()
         );
 
-        $this->addYesNoField(
+        $this->addYesNoWithDefaultField(
             $fieldSet,
             'active',
-            __('Active')->render()
+            __('Active')->render(),
+            1
         );
     }
 }
