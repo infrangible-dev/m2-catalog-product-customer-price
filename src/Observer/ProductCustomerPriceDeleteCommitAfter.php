@@ -13,7 +13,7 @@ use Magento\Framework\Event\ObserverInterface;
  * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
-class ProductCustomerPriceSaveCommitAfter implements ObserverInterface
+class ProductCustomerPriceDeleteCommitAfter implements ObserverInterface
 {
     /** @var Data */
     protected $helper;
