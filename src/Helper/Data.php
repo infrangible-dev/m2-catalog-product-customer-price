@@ -86,53 +86,55 @@ class Data
 
         $currentCalculationsData = $this->databaseHelper->fetchAssoc($currentCalculationsQuery);
 
-        if ($previousCalculationsData) {
-            $diff = $this->arrays->arrayDiffRecursive(
-                $previousCalculationsData,
-                $currentCalculationsData
-            );
+        if (! $previousCalculationsData) {
+            $previousCalculationsData = [];
+        }
 
-            $cacheTags = [];
+        $diff = $this->arrays->arrayDiffRecursive(
+            $previousCalculationsData,
+            $currentCalculationsData
+        );
 
-            $productIds = array_keys($diff);
+        $cacheTags = [];
 
-            foreach ($productIds as $productId) {
-                $product = $this->productHelper->loadProduct($this->variables->intValue($productId));
+        $productIds = array_keys($diff);
 
-                if ($product->getId()) {
-                    $cacheTags = array_merge(
-                        $cacheTags,
-                        $product->getIdentities()
-                    );
+        foreach ($productIds as $productId) {
+            $product = $this->productHelper->loadProduct($this->variables->intValue($productId));
 
-                    $categoryIds = $product->getAvailableInCategories();
+            if ($product->getId()) {
+                $cacheTags = array_merge(
+                    $cacheTags,
+                    $product->getIdentities()
+                );
 
-                    foreach ($categoryIds as $categoryId) {
-                        $category = $this->categoryHelper->loadCategory($this->variables->intValue($categoryId));
+                $categoryIds = $product->getAvailableInCategories();
 
-                        if ($category->getId()) {
-                            $cacheTags = array_merge(
-                                $cacheTags,
-                                $category->getIdentities()
-                            );
-                        }
+                foreach ($categoryIds as $categoryId) {
+                    $category = $this->categoryHelper->loadCategory($this->variables->intValue($categoryId));
+
+                    if ($category->getId()) {
+                        $cacheTags = array_merge(
+                            $cacheTags,
+                            $category->getIdentities()
+                        );
                     }
                 }
             }
+        }
 
-            $cacheTags = array_unique($cacheTags);
+        $cacheTags = array_unique($cacheTags);
 
-            if (! empty($cacheTags)) {
-                $this->blockCache->clean(
-                    \Zend_Cache::CLEANING_MODE_MATCHING_TAG,
-                    $cacheTags
-                );
+        if (! empty($cacheTags)) {
+            $this->blockCache->clean(
+                \Zend_Cache::CLEANING_MODE_MATCHING_ANY_TAG,
+                $cacheTags
+            );
 
-                $this->fullPageCache->clean(
-                    \Zend_Cache::CLEANING_MODE_MATCHING_TAG,
-                    $cacheTags
-                );
-            }
+            $this->fullPageCache->clean(
+                \Zend_Cache::CLEANING_MODE_MATCHING_ANY_TAG,
+                $cacheTags
+            );
         }
 
         $this->flagManager->saveFlag(
