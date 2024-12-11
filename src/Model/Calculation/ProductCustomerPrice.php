@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Infrangible\CatalogProductCustomerPrice\Model\Calculation;
 
 use FeWeDev\Base\Json;
+use Infrangible\CatalogProductPriceCalculation\Helper\Data;
 use Infrangible\CatalogProductPriceCalculation\Model\Calculation\Base;
 use Infrangible\CatalogProductPriceCalculation\Model\Calculation\Prices\SimpleFactory;
 use Infrangible\CatalogProductPriceCalculation\Model\Calculation\PricesInterface;
+use Infrangible\CatalogProductPriceCalculation\Model\CalculationDataInterface;
 use Magento\Catalog\Model\Product;
-use Magento\Catalog\Pricing\Price\FinalPrice;
 use Magento\Customer\Model\Session;
 use Magento\Framework\Pricing\Amount\AmountFactory;
 
@@ -18,10 +19,13 @@ use Magento\Framework\Pricing\Amount\AmountFactory;
  * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
-class ProductCustomerPrice extends Base
+class ProductCustomerPrice extends Base implements CalculationDataInterface
 {
     /** @var Session */
     protected $customerSession;
+
+    /** @var Data */
+    protected $priceCalculationHelper;
 
     /** @var Json */
     protected $json;
@@ -48,7 +52,8 @@ class ProductCustomerPrice extends Base
         SimpleFactory $pricesFactory,
         AmountFactory $amountFactory,
         Session $customerSession,
-        Json $json
+        Json $json,
+        Data $priceCalculationHelper
     ) {
         parent::__construct(
             $pricesFactory,
@@ -57,6 +62,7 @@ class ProductCustomerPrice extends Base
 
         $this->customerSession = $customerSession;
         $this->json = $json;
+        $this->priceCalculationHelper = $priceCalculationHelper;
     }
 
     public function getCode(): string
@@ -145,81 +151,10 @@ class ProductCustomerPrice extends Base
      */
     public function getProductPrices(Product $product): PricesInterface
     {
-        if ($this->getPrice() === null && $this->getDiscount() === null) {
-            throw new \Exception('No fixed priced or discount in price calculation');
-        }
-
-        $prices = $this->pricesFactory->create();
-
-        $price = $product->getPriceInfo()->getPrice('final_price');
-
-        if ($price instanceof FinalPrice) {
-            if ($this->getPrice() !== null) {
-                $prices->setFinalPrice(
-                    $this->amountFactory->create(
-                        round(
-                            $this->getPrice(),
-                            2
-                        )
-                    )
-                );
-            } else {
-                $prices->setFinalPrice(
-                    $this->amountFactory->create(
-                        round(
-                            $price->getValue() * ((100 - $this->getDiscount()) / 100),
-                            2
-                        )
-                    )
-                );
-            }
-        }
-
-        if ($price instanceof \Magento\Bundle\Pricing\Price\FinalPrice) {
-            if ($this->getPrice() !== null) {
-                $prices->setMinimalPrice(
-                    $this->amountFactory->create(
-                        round(
-                            $price->getMinimalPrice()->getValue(),
-                            2
-                        )
-                    )
-                );
-            } else {
-                $prices->setMinimalPrice(
-                    $this->amountFactory->create(
-                        round(
-                            $price->getMinimalPrice()->getValue() * ((100 - $this->getDiscount()) / 100),
-                            2
-                        )
-                    )
-                );
-            }
-
-            if ($this->getPrice() !== null) {
-                $prices->setMaximalPrice(
-                    $this->amountFactory->create(
-                        round(
-                            $price->getMaximalPrice()->getValue(),
-                            2
-                        )
-                    )
-                );
-            } else {
-                $prices->setMaximalPrice(
-                    $this->amountFactory->create(
-                        round(
-                            $price->getMaximalPrice()->getValue() * ((100 - $this->getDiscount()) / 100),
-                            2
-                        )
-                    )
-                );
-            }
-        }
-
-        $prices->setOldPrice($this->amountFactory->create($product->getFinalPrice()));
-
-        return $prices;
+        return $this->priceCalculationHelper->calculatePrices(
+            $product,
+            $this
+        );
     }
 
     public function isActive(): bool
