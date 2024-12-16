@@ -10,8 +10,10 @@ use Infrangible\CatalogProductPriceCalculation\Model\Calculation\Base;
 use Infrangible\CatalogProductPriceCalculation\Model\Calculation\Prices\SimpleFactory;
 use Infrangible\CatalogProductPriceCalculation\Model\Calculation\PricesInterface;
 use Infrangible\CatalogProductPriceCalculation\Model\CalculationDataInterface;
+use Infrangible\Core\Helper\Stores;
 use Magento\Catalog\Model\Product;
 use Magento\Customer\Model\Session;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Pricing\Amount\AmountFactory;
 
 /**
@@ -24,11 +26,14 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
     /** @var Session */
     protected $customerSession;
 
+    /** @var Json */
+    protected $json;
+
     /** @var Data */
     protected $priceCalculationHelper;
 
-    /** @var Json */
-    protected $json;
+    /** @var Stores */
+    protected $storeHelper;
 
     /** @var string */
     private $code;
@@ -45,6 +50,9 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
     /** @var int|null */
     private $discount;
 
+    /** @var int */
+    private $websiteId;
+
     /** @var string */
     private $quoteItemOptionCode;
 
@@ -53,7 +61,8 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
         AmountFactory $amountFactory,
         Session $customerSession,
         Json $json,
-        Data $priceCalculationHelper
+        Data $priceCalculationHelper,
+        Stores $storeHelper
     ) {
         parent::__construct(
             $pricesFactory,
@@ -63,6 +72,7 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
         $this->customerSession = $customerSession;
         $this->json = $json;
         $this->priceCalculationHelper = $priceCalculationHelper;
+        $this->storeHelper = $storeHelper;
     }
 
     public function getCode(): string
@@ -76,7 +86,8 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
                             'product_id' => $this->getProductId(),
                             'price'      => $this->getPrice(),
                             'discount'   => $this->getDiscount(),
-                            'priority'   => $this->getPriority()
+                            'priority'   => $this->getPriority(),
+                            'website_id' => $this->getWebsiteId(),
                         ]
                     )
                 )
@@ -131,6 +142,16 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
         $this->discount = $discount;
     }
 
+    public function getWebsiteId(): int
+    {
+        return $this->websiteId;
+    }
+
+    public function setWebsiteId(int $websiteId): void
+    {
+        $this->websiteId = $websiteId;
+    }
+
     public function getQuoteItemOptionCode(): string
     {
         return $this->quoteItemOptionCode;
@@ -157,13 +178,21 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
         );
     }
 
+    /**
+     * @throws LocalizedException
+     */
     public function isActive(): bool
     {
         if ($this->customerSession->isLoggedIn()) {
             $customer = $this->customerSession->getCustomer();
 
             if ($customer->getId() == $this->getCustomerId()) {
-                return true;
+                $website = $this->storeHelper->getWebsite();
+                $websiteId = $website->getId();
+
+                if ($websiteId == $this->getWebsiteId()) {
+                    return true;
+                }
             }
         }
 

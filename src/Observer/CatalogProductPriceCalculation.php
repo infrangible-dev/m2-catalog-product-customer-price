@@ -9,6 +9,7 @@ use Infrangible\CatalogProductCustomerPrice\Model\Calculation\ProductCustomerPri
 use Infrangible\CatalogProductCustomerPrice\Model\ProductCustomerPrice;
 use Infrangible\CatalogProductCustomerPrice\Model\ResourceModel\ProductCustomerPrice\CollectionFactory;
 use Infrangible\CatalogProductPriceCalculation\Model\Calculations;
+use Infrangible\Core\Helper\Stores;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 
@@ -28,14 +29,19 @@ class CatalogProductPriceCalculation implements ObserverInterface
     /** @var Variables */
     protected $variables;
 
+    /** @var Stores */
+    protected $storeHelper;
+
     public function __construct(
         ProductCustomerPriceFactory $productCustomerPriceCalculationFactory,
         CollectionFactory $productCustomerPriceCollectionFactory,
-        Variables $variables
+        Variables $variables,
+        Stores $storeHelper
     ) {
         $this->productCustomerPriceCalculationFactory = $productCustomerPriceCalculationFactory;
         $this->productCustomerPriceCollectionFactory = $productCustomerPriceCollectionFactory;
         $this->variables = $variables;
+        $this->storeHelper = $storeHelper;
     }
 
     /**
@@ -43,6 +49,9 @@ class CatalogProductPriceCalculation implements ObserverInterface
      */
     public function execute(Observer $observer): void
     {
+        $website = $this->storeHelper->getWebsite();
+        $websiteId = $website->getId();
+
         /** @var Calculations $calculations */
         $calculations = $observer->getData('calculations');
 
@@ -50,6 +59,7 @@ class CatalogProductPriceCalculation implements ObserverInterface
         $productCustomerPriceCollection->addUsableFilter();
         $productCustomerPriceCollection->addActiveFilter();
         $productCustomerPriceCollection->addPriorityOrder();
+        $productCustomerPriceCollection->addWebsiteFilter($this->variables->intValue($websiteId));
 
         /** @var ProductCustomerPrice $productCustomerPrice */
         foreach ($productCustomerPriceCollection as $productCustomerPrice) {
@@ -71,6 +81,9 @@ class CatalogProductPriceCalculation implements ObserverInterface
             }
             $productCustomerPriceCalculation->setPriority(
                 $this->variables->intValue($productCustomerPrice->getPriority())
+            );
+            $productCustomerPriceCalculation->setWebsiteId(
+                $this->variables->intValue($productCustomerPrice->getWebsiteId())
             );
             $productCustomerPriceCalculation->setQuoteItemOptionCode($productCustomerPrice->getId());
 

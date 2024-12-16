@@ -29,7 +29,10 @@ class UpgradeSchema implements UpgradeSchemaInterface
         )) {
             $connection = $setup->getConnection();
 
-            if (! $connection->tableColumnExists($customerPricesTableName, 'priority')) {
+            if (! $connection->tableColumnExists(
+                $customerPricesTableName,
+                'priority'
+            )) {
                 $connection->addColumn(
                     $customerPricesTableName,
                     'priority',
@@ -49,8 +52,56 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ['limit', 'used']
             );
 
-            if (in_array($limitUsedIndexName, $connection->getIndexList($customerPricesTableName))) {
-                $connection->dropIndex($customerPricesTableName, $limitUsedIndexName);
+            if (in_array(
+                $limitUsedIndexName,
+                $connection->getIndexList($customerPricesTableName)
+            )) {
+                $connection->dropIndex(
+                    $customerPricesTableName,
+                    $limitUsedIndexName
+                );
+            }
+        }
+
+        if (version_compare(
+            $context->getVersion(),
+            '1.5.0',
+            '<'
+        )) {
+            $connection = $setup->getConnection();
+
+            if (! $connection->tableColumnExists(
+                $customerPricesTableName,
+                'website_id'
+            )) {
+                $connection->addColumn(
+                    $customerPricesTableName,
+                    'website_id',
+                    [
+                        'type'     => Table::TYPE_SMALLINT,
+                        'length'   => 5,
+                        'nullable' => false,
+                        'unsigned' => true,
+                        'default'  => 0,
+                        'comment'  => 'Website ID',
+                        'after'    => 'priority'
+                    ]
+                );
+
+                $websiteTableName = $connection->getTableName('store_website');
+
+                $connection->addForeignKey(
+                    $connection->getForeignKeyName(
+                        $customerPricesTableName,
+                        'website_id',
+                        $websiteTableName,
+                        'website_id'
+                    ),
+                    $customerPricesTableName,
+                    'website_id',
+                    $websiteTableName,
+                    'website_id'
+                );
             }
         }
 

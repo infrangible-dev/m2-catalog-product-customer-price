@@ -52,6 +52,8 @@ class Grid extends \Infrangible\BackendWidget\Block\Grid
             __('Priority')->render()
         );
 
+        $this->addWebsiteNameColumn('website_id');
+
         $this->addNumberColumn(
             'used',
             __('Used')->render()

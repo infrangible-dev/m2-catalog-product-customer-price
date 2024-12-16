@@ -28,7 +28,7 @@ class Data
             'product_customer_price',
             'catalog_product_customer_price',
             'product_id',
-            ['price', 'discount', 'priority']
+            ['price', 'discount', 'priority', 'website_id']
         );
     }
 }

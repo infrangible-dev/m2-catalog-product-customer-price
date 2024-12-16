@@ -39,4 +39,19 @@ class Collection extends AbstractCollection
     {
         $this->getSelect()->order('main_table.priority DESC');
     }
+
+    public function addWebsiteFilter(int $websiteId, bool $includeAdmin = true)
+    {
+        if ($includeAdmin) {
+            $this->getSelect()->where(
+                'main_table.website_id IN (?)',
+                [0, $websiteId]
+            );
+        } else {
+            $this->getSelect()->where(
+                'main_table.website_id = ?',
+                $websiteId
+            );
+        }
+    }
 }

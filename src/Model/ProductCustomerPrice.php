@@ -23,6 +23,8 @@ use Magento\Framework\Model\AbstractModel;
  * @method void setLimit(int $limit)
  * @method int getPriority()
  * @method void setPriority(int $priority)
+ * @method int getWebsiteId()
+ * @method void setWebsiteId(int $websiteId)
  * @method int getUsed()
  * @method void setUsed(int $used)
  * @method int getActive()
