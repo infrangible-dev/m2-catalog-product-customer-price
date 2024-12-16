@@ -87,7 +87,7 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
                             'price'      => $this->getPrice(),
                             'discount'   => $this->getDiscount(),
                             'priority'   => $this->getPriority(),
-                            'website_id' => $this->getWebsiteId(),
+                            'website_id' => $this->getWebsiteId()
                         ]
                     )
                 )
@@ -187,10 +187,14 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
             $customer = $this->customerSession->getCustomer();
 
             if ($customer->getId() == $this->getCustomerId()) {
-                $website = $this->storeHelper->getWebsite();
-                $websiteId = $website->getId();
+                if ($this->getWebsiteId() != 0) {
+                    $website = $this->storeHelper->getWebsite();
+                    $websiteId = $website->getId();
 
-                if ($websiteId == $this->getWebsiteId()) {
+                    if ($websiteId == $this->getWebsiteId()) {
+                        return true;
+                    }
+                } else {
                     return true;
                 }
             }
