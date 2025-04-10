@@ -15,7 +15,7 @@ use Magento\Framework\Event\ObserverInterface;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2025 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class CatalogProductPriceCalculation implements ObserverInterface
@@ -68,23 +68,35 @@ class CatalogProductPriceCalculation implements ObserverInterface
             $productCustomerPriceCalculation->setCustomerId(
                 $this->variables->intValue($productCustomerPrice->getCustomerId())
             );
+
             $productCustomerPriceCalculation->setProductId(
                 $this->variables->intValue($productCustomerPrice->getProductId())
             );
+
             if ($productCustomerPrice->getPrice()) {
                 $productCustomerPriceCalculation->setPrice(floatval($productCustomerPrice->getPrice()));
             }
+
             if ($productCustomerPrice->getDiscount()) {
                 $productCustomerPriceCalculation->setDiscount(
                     $this->variables->intValue($productCustomerPrice->getDiscount())
                 );
             }
+
             $productCustomerPriceCalculation->setPriority(
                 $this->variables->intValue($productCustomerPrice->getPriority())
             );
+
+            if ($productCustomerPrice->getLimit()) {
+                $productCustomerPriceCalculation->setLimit(
+                    $productCustomerPrice->getLimit() - $productCustomerPrice->getUsed()
+                );
+            }
+
             $productCustomerPriceCalculation->setWebsiteId(
                 $this->variables->intValue($productCustomerPrice->getWebsiteId())
             );
+
             $productCustomerPriceCalculation->setQuoteItemOptionCode($productCustomerPrice->getId());
 
             $calculations->addCalculation($productCustomerPriceCalculation);

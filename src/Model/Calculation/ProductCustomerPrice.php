@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Infrangible\CatalogProductCustomerPrice\Model\Calculation;
 
 use FeWeDev\Base\Json;
+use FeWeDev\Base\Variables;
 use Infrangible\CatalogProductPriceCalculation\Helper\Data;
 use Infrangible\CatalogProductPriceCalculation\Model\Calculation\Base;
 use Infrangible\CatalogProductPriceCalculation\Model\Calculation\Prices\SimpleFactory;
@@ -14,17 +15,22 @@ use Infrangible\Core\Helper\Stores;
 use Magento\Catalog\Model\Product;
 use Magento\Customer\Model\Session;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Pricing\Amount\AmountFactory;
+use Magento\Quote\Model\Quote\Item;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2025 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class ProductCustomerPrice extends Base implements CalculationDataInterface
 {
     /** @var Session */
     protected $customerSession;
+
+    /** @var \Magento\Checkout\Model\Session */
+    protected $checkoutSession;
 
     /** @var Json */
     protected $json;
@@ -34,6 +40,9 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
 
     /** @var Stores */
     protected $storeHelper;
+
+    /** @var Variables */
+    protected $variables;
 
     /** @var string */
     private $code;
@@ -50,6 +59,9 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
     /** @var int|null */
     private $discount;
 
+    /** @var int|null */
+    private $limit;
+
     /** @var int */
     private $websiteId;
 
@@ -60,9 +72,11 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
         SimpleFactory $pricesFactory,
         AmountFactory $amountFactory,
         Session $customerSession,
+        \Magento\Checkout\Model\Session $checkoutSession,
         Json $json,
         Data $priceCalculationHelper,
-        Stores $storeHelper
+        Stores $storeHelper,
+        Variables $variables
     ) {
         parent::__construct(
             $pricesFactory,
@@ -70,9 +84,11 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
         );
 
         $this->customerSession = $customerSession;
+        $this->checkoutSession = $checkoutSession;
         $this->json = $json;
         $this->priceCalculationHelper = $priceCalculationHelper;
         $this->storeHelper = $storeHelper;
+        $this->variables = $variables;
     }
 
     public function getCode(): string
@@ -142,6 +158,16 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
         $this->discount = $discount;
     }
 
+    public function getLimit(): ?int
+    {
+        return $this->limit;
+    }
+
+    public function setLimit(?int $limit): void
+    {
+        $this->limit = $limit;
+    }
+
     public function getWebsiteId(): int
     {
         return $this->websiteId;
@@ -181,25 +207,152 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
     /**
      * @throws LocalizedException
      */
-    public function isActive(): bool
+    public function isAvailableForProduct(): bool
     {
-        if ($this->customerSession->isLoggedIn()) {
-            $customer = $this->customerSession->getCustomer();
+        if (! $this->customerSession->isLoggedIn()) {
+            return false;
+        }
 
-            if ($customer->getId() == $this->getCustomerId()) {
-                if ($this->getWebsiteId() != 0) {
-                    $website = $this->storeHelper->getWebsite();
-                    $websiteId = $website->getId();
+        $customer = $this->customerSession->getCustomer();
 
-                    if ($websiteId == $this->getWebsiteId()) {
-                        return true;
-                    }
-                } else {
-                    return true;
-                }
+        if ($customer->getId() != $this->getCustomerId()) {
+            return false;
+        }
+
+        if (! $this->isWebsite()) {
+            return false;
+        }
+
+        if (! $this->getLimit()) {
+            return true;
+        }
+
+        $quote = $this->checkoutSession->getQuote();
+
+        /** @var Item[] $quoteItems */
+        $quoteItems = $quote->getItemsCollection()->getItems();
+
+        $productQty = $this->getQuoteQty($quoteItems);
+
+        return $productQty < $this->getLimit();
+    }
+
+    /**
+     * @throws LocalizedException
+     */
+    private function isWebsite(): bool
+    {
+        if ($this->getWebsiteId() == 0) {
+            return true;
+        } else {
+            $website = $this->storeHelper->getWebsite();
+            $websiteId = $website->getId();
+
+            if ($websiteId == $this->getWebsiteId()) {
+                return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * @param Item[] $calculatedItems
+     *
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     * @throws \Exception
+     */
+    private function getQuoteQty(array $calculatedItems = []): float
+    {
+        $quote = $this->checkoutSession->getQuote();
+
+        $quoteItems = $quote->getItemsCollection();
+
+        $calculatedItemIds = [];
+
+        foreach ($calculatedItems as $calculatedItem) {
+            $calculatedItemIds[] = $calculatedItem->getId();
+        }
+
+        $productQty = 0;
+
+        /** @var Item $quoteItem */
+        foreach ($quoteItems as $quoteItem) {
+            if (! in_array(
+                $quoteItem->getId(),
+                $calculatedItemIds
+            )) {
+                continue;
+            }
+
+            $productId = $this->variables->intValue($quoteItem->getProduct()->getId());
+
+            if ($productId == $this->getProductId()) {
+                $productQty += $quoteItem->getQty();
+            }
+        }
+
+        return $productQty;
+    }
+
+    /**
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
+    public function hasProductQty(float $qty): bool
+    {
+        if (! $this->getLimit()) {
+            return true;
+        }
+
+        $quote = $this->checkoutSession->getQuote();
+
+        /** @var Item[] $quoteItems */
+        $quoteItems = $quote->getItemsCollection()->getItems();
+
+        $productQty = $this->getQuoteQty($quoteItems);
+
+        return $productQty + $qty <= $this->getLimit();
+    }
+
+    /**
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
+    public function isAvailableForQuoteItem(Item $item, array $calculatedItems): bool
+    {
+        if (! $this->customerSession->isLoggedIn()) {
+            return false;
+        }
+
+        $customer = $this->customerSession->getCustomer();
+
+        if ($customer->getId() != $this->getCustomerId()) {
+            return false;
+        }
+
+        if (! $this->getLimit()) {
+            return true;
+        }
+
+        $productQty = $this->getQuoteQty($calculatedItems);
+
+        return $productQty + $item->getQty() <= $this->getLimit();
+    }
+
+    /**
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
+    public function hasQuoteItemQty(Item $item, array $calculatedItems): bool
+    {
+        if (! $this->getLimit()) {
+            return true;
+        }
+
+        $productQty = $this->getQuoteQty($calculatedItems);
+
+        return $productQty + $item->getQty() <= $this->getLimit();
     }
 }
