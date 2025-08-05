@@ -205,6 +205,14 @@ class ProductCustomerPrice extends Base implements CalculationDataInterface
     }
 
     /**
+     * @return PricesInterface[]
+     */
+    public function getProductTierPrices(Product $product): array
+    {
+        return [];
+    }
+
+    /**
      * @throws LocalizedException
      */
     public function isAvailableForProduct(): bool
