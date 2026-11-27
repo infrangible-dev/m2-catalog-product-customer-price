@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.0.2
+
+### Changed
+
+- The price calculation reads the customer prices with `getData()` and the column names instead of magic methods.
+
 ## 4.0.1
 
 ### Changed

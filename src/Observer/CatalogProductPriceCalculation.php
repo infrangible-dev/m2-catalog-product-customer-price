@@ -66,27 +66,27 @@ class CatalogProductPriceCalculation implements ObserverInterface
             $calculation = $this->productCustomerPriceCalculationFactory->create();
 
             $calculation->setCustomerPriceId($this->variables->intValue($productCustomerPrice->getId()));
-            $calculation->setCustomerId($this->variables->intValue($productCustomerPrice->getCustomerId()));
-            $calculation->setProductId($this->variables->intValue($productCustomerPrice->getProductId()));
-            $calculation->setPriority($this->variables->intValue($productCustomerPrice->getPriority()));
-            $calculation->setWebsiteId($this->variables->intValue($productCustomerPrice->getWebsiteId()));
+            $calculation->setCustomerId($this->variables->intValue($productCustomerPrice->getData('customer_id')));
+            $calculation->setProductId($this->variables->intValue($productCustomerPrice->getData('product_id')));
+            $calculation->setPriority($this->variables->intValue($productCustomerPrice->getData('priority')));
+            $calculation->setWebsiteId($this->variables->intValue($productCustomerPrice->getData('website_id')));
 
-            $price = $productCustomerPrice->getPrice();
+            $price = $productCustomerPrice->getData('price');
 
             if (is_numeric($price)) {
                 $calculation->setPrice((float)$price);
             }
 
-            $discount = $this->getInt($productCustomerPrice->getDiscount());
+            $discount = $this->getInt($productCustomerPrice->getData('discount'));
 
             if ($discount > 0) {
                 $calculation->setDiscount($discount);
             }
 
-            $limit = $this->getInt($productCustomerPrice->getLimit());
+            $limit = $this->getInt($productCustomerPrice->getData('limit'));
 
             if ($limit > 0) {
-                $calculation->setLimit(max(0, $limit - $this->getInt($productCustomerPrice->getUsed())));
+                $calculation->setLimit(max(0, $limit - $this->getInt($productCustomerPrice->getData('used'))));
             }
 
             $calculations->addCalculation($calculation);

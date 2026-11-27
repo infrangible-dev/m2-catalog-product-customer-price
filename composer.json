@@ -2,7 +2,7 @@
     "name": "infrangible/m2-catalog-product-customer-price",
     "description": "Set individual prices or percentage discounts for specific customers and products, optionally limited in quantity or to one website; customers see and pay them when logged in.",
     "type": "magento2-module",
-    "version": "4.0.1",
+    "version": "4.0.2",
     "license": "MIT",
     "keywords": [
         "Magento",
