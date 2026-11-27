@@ -107,9 +107,9 @@ class SalesOrderPlaceAfter implements ObserverInterface
             return;
         }
 
-        $used = $productCustomerPrice->getUsed();
+        $used = $productCustomerPrice->getData('used');
 
-        $productCustomerPrice->setUsed((is_numeric($used) ? (int)$used : 0) + $qty);
+        $productCustomerPrice->setData('used', (is_numeric($used) ? (int)$used : 0) + $qty);
 
         $productCustomerPriceResource->save($productCustomerPrice);
     }

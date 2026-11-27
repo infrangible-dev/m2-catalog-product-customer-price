@@ -4,7 +4,8 @@
 
 ### Changed
 
-- The price calculation reads the customer prices with `getData()` and the column names instead of magic methods.
+- The price calculation reads the customer prices and the order placement counts their use with `getData()` and
+  `setData()` and the column names instead of magic methods.
 
 ## 4.0.1
 
